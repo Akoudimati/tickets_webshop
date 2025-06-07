@@ -2,10 +2,11 @@ const mysql = require('mysql2');
 
 // Create database connection pool
 const pool = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: process.env.DB_PASSWORD || '',  // Use environment variable for password
-    database: 'sport_tickets',
+    host: 'sql7.freesqldatabase.com',
+    user: 'sql7783571',
+    password: 'k5V4xMb77e',
+    database: 'sql7783571',
+    port: 3306,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
