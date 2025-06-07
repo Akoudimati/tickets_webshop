@@ -58,7 +58,7 @@ function updateNavigation() {
         if (!existingAdminLink) {
             const adminItem = document.createElement('li');
             adminItem.className = 'nav-item';
-            adminItem.innerHTML = '<a class="nav-link text-danger fw-bold" href="/admin.html"><i class="bi bi-gear-fill me-1"></i>Admin</a>';
+            adminItem.innerHTML = '<a class="nav-link admin-btn" href="/admin.html"><i class="bi bi-gear-fill me-1"></i>Admin</a>';
             leftNav.appendChild(adminItem);
         }
     } else {
