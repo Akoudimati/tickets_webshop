@@ -86,18 +86,37 @@ function updateNavigation() {
         `;
         rightNav.appendChild(cartItem);
         
-        // Create user dropdown
+        // Create user dropdown with profile image
         const userDropdown = document.createElement('li');
         userDropdown.className = 'nav-item dropdown';
+        
+        // Get user's first letter for avatar fallback
+        const userInitial = (user.name || 'U').charAt(0).toUpperCase();
+        
+        // Use profile image if available, otherwise show initial avatar
+        let profileHtml = '';
+        if (user.profile_img && user.profile_img.trim() !== '') {
+            // Show only the profile image
+            profileHtml = `<img src="${user.profile_img}" alt="Profile" class="profile-img-nav me-2">`;
+        } else {
+            // Show initial avatar only when no profile image is available
+            profileHtml = `
+                <div class="profile-avatar-nav me-2">
+                    ${userInitial}
+                </div>
+            `;
+        }
+        
         userDropdown.innerHTML = `
-            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                ${user.name || 'User'}
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                ${profileHtml}
+                <span>${user.name || 'User'}</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                <li><a class="dropdown-item" href="/profile.html">My Profile</a></li>
-                <li><a class="dropdown-item" href="/orders.html">My Orders</a></li>
+                <li><a class="dropdown-item" href="/profile.html"><i class="bi bi-person me-2"></i>My Profile</a></li>
+                <li><a class="dropdown-item" href="/orders.html"><i class="bi bi-cart-check me-2"></i>My Orders</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#" id="logout-button">Logout</a></li>
+                <li><a class="dropdown-item" href="#" id="logout-button"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
             </ul>
         `;
         

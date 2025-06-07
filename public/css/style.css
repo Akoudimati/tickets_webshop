@@ -65,6 +65,51 @@ body {
     transform: translateY(-1px) !important;
 }
 
+/* Profile image in navigation */
+.profile-img-nav {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+.profile-img-nav:hover {
+    border-color: rgba(255, 255, 255, 0.6) !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Profile avatar fallback in navigation */
+.profile-avatar-nav {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, var(--primary-green), var(--secondary-green)) !important;
+    color: white !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+    font-weight: bold !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    transition: all 0.3s ease !important;
+    text-transform: uppercase !important;
+}
+
+.profile-avatar-nav:hover {
+    border-color: rgba(255, 255, 255, 0.6) !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* User dropdown styling improvements */
+.navbar-nav .dropdown-toggle.d-flex {
+    align-items: center !important;
+    padding: 0.5rem 0.75rem !important;
+}
+
 .navbar-brand {
     font-weight: 700;
     font-size: 1.5rem;
