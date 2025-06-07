@@ -6,13 +6,55 @@ let filtersVisible = false;
 // Initialize filters when the page loads
 document.addEventListener('DOMContentLoaded', function() {
     if (window.location.pathname === '/tickets.html') {
-        // Set up event listeners for filters
-        setupFilterEventListeners();
-        
-        // Load all tickets initially
-        loadAllTicketsWithFilters();
+        // Load categories for filters first, then set up everything else
+        loadCategoriesForFilters().then(() => {
+            // Set up event listeners for filters
+            setupFilterEventListeners();
+            
+            // Load all tickets initially
+            loadAllTicketsWithFilters();
+        });
     }
 });
+
+async function loadCategoriesForFilters() {
+    try {
+        const response = await fetch('/api/categories');
+        if (!response.ok) {
+            throw new Error('Failed to fetch categories');
+        }
+        
+        const categories = await response.json();
+        const categoryFiltersContainer = document.querySelector('.category-filters');
+        
+        if (!categoryFiltersContainer) return;
+        
+        // Create the filter HTML
+        let filtersHTML = `
+            <div class="form-check form-check-inline">
+                <input class="form-check-input category-filter" type="checkbox" value="all" id="category-all" checked>
+                <label class="form-check-label" for="category-all">All Categories</label>
+            </div>
+        `;
+        
+        categories.forEach(category => {
+            const categoryId = `category-${category.name.toLowerCase().replace(/\s+/g, '-')}`;
+            filtersHTML += `
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input category-filter" type="checkbox" value="${category.name}" id="${categoryId}">
+                    <label class="form-check-label" for="${categoryId}">${category.name}</label>
+                </div>
+            `;
+        });
+        
+        categoryFiltersContainer.innerHTML = filtersHTML;
+        
+    } catch (error) {
+        console.error('Error loading categories for filters:', error);
+        // Fallback to default categories if API fails
+        console.log('Using fallback categories');
+    }
+}
 
 function setupFilterEventListeners() {
     // Category filter checkboxes

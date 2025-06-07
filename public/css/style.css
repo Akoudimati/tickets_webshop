@@ -531,10 +531,10 @@ body {
 
 /* ===== FOOTER ===== */
 footer {
-    background: var(--gradient-primary);
+    background: var(--dark-green);
     color: var(--white);
-    margin-top: 4rem;
     padding: 2rem 0;
+    margin-top: auto;
     text-align: center;
     box-shadow: 0 -4px 8px rgba(40, 167, 69, 0.15);
 }
