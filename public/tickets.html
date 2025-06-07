@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Tickets - Sports Ticket System</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">Sports Ticket System</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tickets.html">All Tickets</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about.html">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact.html">Contact</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <!-- Authentication links will be inserted here by auth.js -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="jumbotron">
+            <h1 class="display-4">All Available Tickets</h1>
+            <p class="lead">Browse all tickets available for purchase.</p>
+            <hr class="my-4">
+            
+            <!-- Filter Toggle Button -->
+            <div class="filter-toggle-section mb-3">
+                <button type="button" class="btn btn-primary" id="filter-toggle-btn" onclick="toggleFilters()">
+                    <i class="fas fa-filter me-2"></i>Show Filters
+                </button>
+                <span class="ms-3 text-muted" id="results-count">Loading tickets...</span>
+            </div>
+            
+            <!-- Filter Section (Initially Hidden) -->
+            <div class="filters-section mb-4" id="filters-section" style="display: none;">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Filter by Category</h5>
+                        <div class="category-filters">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input category-filter" type="checkbox" value="all" id="category-all" checked>
+                                <label class="form-check-label" for="category-all">All Categories</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input category-filter" type="checkbox" value="Voetbal" id="category-voetbal">
+                                <label class="form-check-label" for="category-voetbal">Voetbal</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input category-filter" type="checkbox" value="Basketbal" id="category-basketbal">
+                                <label class="form-check-label" for="category-basketbal">Basketbal</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input category-filter" type="checkbox" value="Tennis" id="category-tennis">
+                                <label class="form-check-label" for="category-tennis">Tennis</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input category-filter" type="checkbox" value="Hockey" id="category-hockey">
+                                <label class="form-check-label" for="category-hockey">Hockey</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Sort by Price</h5>
+                        <div class="price-sorting">
+                            <div class="form-check">
+                                <input class="form-check-input price-sort" type="radio" name="priceSort" value="default" id="price-default" checked>
+                                <label class="form-check-label" for="price-default">Default Order</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input price-sort" type="radio" name="priceSort" value="low-to-high" id="price-low-high">
+                                <label class="form-check-label" for="price-low-high">Price: Low to High</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input price-sort" type="radio" name="priceSort" value="high-to-low" id="price-high-low">
+                                <label class="form-check-label" for="price-high-low">Price: High to Low</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <button type="button" class="btn btn-success" onclick="applyFilters()">Apply Filters</button>
+                        <button type="button" class="btn btn-outline-secondary ms-2" onclick="clearAllFilters()">Clear All Filters</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" id="all-tickets-container">
+                <!-- Tickets will be loaded here dynamically -->
+                <p>Loading tickets...</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="container text-center">
+            <p>&copy; 2023 Sports Ticket System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/filters.js"></script>
+</body>
+</html> 

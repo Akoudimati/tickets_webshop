@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Details - Sports Ticket System</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">Sports Ticket System</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tickets.html">All Tickets</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about.html">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact.html">Contact</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <!-- Authentication links will be inserted here by auth.js -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div id="ticket-details-container">
+            <!-- Ticket details will be loaded here dynamically -->
+            <p>Loading ticket details...</p>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white mt-5 py-3">
+        <div class="container text-center">
+            <p>&copy; 2023 Sports Ticket System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Extract ticket ID from URL more carefully
+            const path = window.location.pathname;
+            const pathParts = path.split('/');
+            const ticketId = pathParts[pathParts.length - 1]; // Get the last part of the URL
+    
+            
+            // Call the loadTicketDetails function from main.js
+            loadTicketDetails(ticketId);
+        });
+    </script>
+</body>
+</html> 
