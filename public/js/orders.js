@@ -66,29 +66,19 @@ function loadUserOrders(userId) {
                                     <div class="row mt-3">
                                         <div class="col-md-6">
                                             <h6>Customer Information</h6>
-                                            <p><strong>Name:</strong> ${order.guest_first_name || order.guest_name || 'N/A'} ${order.guest_last_name || ''}</p>
-                                            <p><strong>Email:</strong> ${order.guest_email || 'N/A'}</p>
-                                            <p><strong>Phone:</strong> ${order.guest_phone || 'N/A'}</p>
+                                            <p><strong>Name:</strong> ${order.guest_name || 'N/A'}</p>
                                         </div>
                                         <div class="col-md-6">
                                             <h6>Delivery Address</h6>
                                             <p><strong>Address:</strong> ${order.guest_street || 'N/A'} ${order.guest_housenumber || ''}</p>
-                                            <p><strong>City:</strong> ${order.guest_city || 'N/A'}</p>
                                             <p><strong>Postal Code:</strong> ${order.guest_postcode || 'N/A'}</p>
                                         </div>
                                     </div>
-                                    
-                                    ${order.order_notes ? `
-                                        <div class="mt-3">
-                                            <h6>Order Notes</h6>
-                                            <p>${order.order_notes}</p>
-                                        </div>
-                                    ` : ''}
                                 </div>
                                 <div class="col-md-4">
                                     <h6>Order Items</h6>
                                     <div class="order-items">
-                                        ${renderOrderItems(order.items)}
+                                        ${order.items ? order.items : 'Loading items...'}
                                     </div>
                                 </div>
                             </div>
@@ -137,7 +127,7 @@ function renderOrderItems(items) {
     return html;
 }
 
-// Get status class for badge
+// Get status class for badge styling
 function getStatusClass(status) {
     switch (status) {
         case 'compleet':
@@ -165,6 +155,12 @@ function getStatusText(status) {
     }
 }
 
+// Helper function to format price
+function formatPrice(price) {
+    if (!price) return '0.00';
+    return parseFloat(price).toFixed(2);
+}
+
 // Helper function to format dates
 function formatDate(dateString) {
     if (!dateString) return 'Date not available';
@@ -184,10 +180,4 @@ function formatDate(dateString) {
         console.error('Error formatting date:', error);
         return dateString;
     }
-}
-
-// Helper function to safely format price
-function formatPrice(price) {
-    const numPrice = price ? parseFloat(price) : 0;
-    return numPrice.toFixed(2);
 } 

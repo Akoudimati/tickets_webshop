@@ -1,50 +1,54 @@
 // Checkout functionality
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // Check if user is logged in using the auth system
-    if (!isLoggedIn()) {
-        alert('Please log in to proceed with checkout.');
-        window.location.href = '/login.html';
-        return;
-    }
-    
-    // Load and display cart items
-    loadCheckoutItems();
-    
-    // Setup form submission
-    const checkoutForm = document.getElementById('checkout-form');
-    if (checkoutForm) {
-        checkoutForm.addEventListener('submit', handleCheckoutSubmission);
-    }
-});
-
-// Load cart items for checkout display
-function loadCheckoutItems() {
     // Check if user is logged in
     if (!isLoggedIn()) {
-        alert('Please log in to proceed with checkout.');
+        alert('Please log in to access the checkout page.');
         window.location.href = '/login.html';
         return;
     }
-    
-    const user = getCurrentUser();
-    if (!user) {
-        alert('Please log in to proceed with checkout.');
+
+    // Get current user from auth system
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
         window.location.href = '/login.html';
         return;
     }
-    
+
     // Get user-specific cart
-    const cartKey = `shoppingCart_user_${user.id}`;
+    const cartKey = `shoppingCart_user_${currentUser.id}`;
     const cart = JSON.parse(localStorage.getItem(cartKey) || '[]');
-    
+
     if (cart.length === 0) {
         alert('Your cart is empty. Redirecting to tickets page.');
         window.location.href = '/tickets.html';
         return;
     }
-    
+
+    // Display cart items in checkout
     displayCheckoutItems(cart);
+
+    // Handle form submission
+    const checkoutForm = document.getElementById('checkout-form');
+    if (checkoutForm) {
+        checkoutForm.addEventListener('submit', handleCheckoutSubmission);
+    }
+
+    // Pre-fill user information if available
+    if (currentUser.email) {
+        const emailField = document.getElementById('email');
+        if (emailField) emailField.value = currentUser.email;
+    }
+    if (currentUser.name) {
+        const firstNameField = document.getElementById('firstName');
+        if (firstNameField) firstNameField.value = currentUser.name.split(' ')[0] || '';
+        const lastNameField = document.getElementById('lastName');
+        if (lastNameField) lastNameField.value = currentUser.name.split(' ').slice(1).join(' ') || '';
+    }
+});
+
+// Helper function to format price
+function formatPrice(price) {
+    return parseFloat(price).toFixed(2);
 }
 
 // Display cart items in checkout summary
@@ -110,17 +114,17 @@ function handleCheckoutSubmission(event) {
         return;
     }
     
-    // Collect form data
+    // Collect form data - only fields that exist in database
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const guestName = `${firstName} ${lastName}`.trim();
+    
     const formData = {
         user_id: currentUser.id,
-        guest_first_name: document.getElementById('firstName').value,
-        guest_last_name: document.getElementById('lastName').value,
-        guest_email: document.getElementById('email').value,
-        guest_phone: document.getElementById('phone').value,
-        guest_street: document.getElementById('address').value,
-        guest_city: document.getElementById('city').value,
-        guest_postcode: document.getElementById('postalCode').value,
-        order_notes: document.getElementById('orderNotes').value,
+        guest_name: guestName,
+        guest_street: document.getElementById('address').value.trim(),
+        guest_postcode: document.getElementById('postalCode').value.trim(),
+        guest_housenumber: '', // You can add a house number field if needed
         items: cart.map(item => ({
             ticket_id: item.ticket.id,
             quantity: item.quantity,
@@ -144,9 +148,7 @@ function submitOrder(orderData, cartKey) {
         submitButton.disabled = true;
         submitButton.textContent = 'Processing Order...';
     }
-    
 
-    
     fetch('/api/orders', {
         method: 'POST',
         headers: {
@@ -155,7 +157,6 @@ function submitOrder(orderData, cartKey) {
         body: JSON.stringify(orderData)
     })
     .then(response => {
-        
         if (!response.ok) {
             return response.text().then(text => {
                 throw new Error(`Failed to create order: ${response.status} ${response.statusText} - ${text}`);
@@ -164,7 +165,6 @@ function submitOrder(orderData, cartKey) {
         return response.json();
     })
     .then(result => {
-        
         // Clear the cart
         localStorage.removeItem(cartKey);
         
@@ -189,10 +189,4 @@ function submitOrder(orderData, cartKey) {
             submitButton.textContent = 'Complete Order';
         }
     });
-}
-
-// Helper function to format price
-function formatPrice(price) {
-    const numPrice = price ? parseFloat(price) : 0;
-    return numPrice.toFixed(2);
 } 

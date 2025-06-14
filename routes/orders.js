@@ -6,16 +6,10 @@ router.post('/', async (req, res) => {
     try {
         const { 
             user_id, 
-            guest_first_name,
-            guest_last_name,
-            guest_email,
-            guest_phone,
             guest_name, 
             guest_postcode, 
             guest_street, 
             guest_housenumber,
-            guest_city,
-            order_notes,
             total_price, 
             items 
         } = req.body;
@@ -51,16 +45,10 @@ router.post('/', async (req, res) => {
             // Prepare parameters, converting undefined/empty to null
             const orderParams = [
                 toNullIfEmpty(user_id),
-                toNullIfEmpty(guest_first_name),
-                toNullIfEmpty(guest_last_name),
-                toNullIfEmpty(guest_email),
-                toNullIfEmpty(guest_phone),
                 toNullIfEmpty(guest_name),
                 toNullIfEmpty(guest_postcode),
                 toNullIfEmpty(guest_street),
                 toNullIfEmpty(guest_housenumber),
-                toNullIfEmpty(guest_city),
-                toNullIfEmpty(order_notes),
                 toNullIfEmpty(total_price)
             ];
             
@@ -70,19 +58,17 @@ router.post('/', async (req, res) => {
                 throw new Error('Invalid data: contains undefined values');
             }
             
-            // Create the order with new fields
+            // Create the order with existing database columns
             const [orderResult] = await conn.execute(
                 `INSERT INTO orders 
-                (user_id, guest_first_name, guest_last_name, guest_email, guest_phone, 
-                 guest_name, guest_postcode, guest_street, guest_housenumber, guest_city, 
-                 order_notes, total_price, status) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'in behandeling')`,
+                (user_id, guest_name, guest_postcode, guest_street, guest_housenumber, total_price, status) 
+                VALUES (?, ?, ?, ?, ?, ?, 'in behandeling')`,
                 orderParams
             );
             
             const orderId = orderResult.insertId;
             
-            // Add order items and update ticket quantities
+            // Add order items
             for (const item of items) {
                 // Ensure item properties are not undefined
                 const itemParams = [
@@ -103,16 +89,6 @@ router.post('/', async (req, res) => {
                     'INSERT INTO order_items (order_id, ticket_id, quantity, price) VALUES (?, ?, ?, ?)',
                     itemParams
                 );
-                
-                // Update ticket quantity (decrease available quantity)
-                const [updateResult] = await conn.execute(
-                    'UPDATE tickets SET quantity_available = quantity_available - ? WHERE id = ? AND quantity_available >= ?',
-                    [item.quantity, item.ticket_id, item.quantity]
-                );
-                
-                if (updateResult.affectedRows === 0) {
-                    throw new Error(`Insufficient tickets available for ticket ID ${item.ticket_id}`);
-                }
             }
             
             await conn.commit();
@@ -130,9 +106,8 @@ router.post('/', async (req, res) => {
     } catch (error) {
         console.error('Error creating order:', error);
         res.status(500).json({ 
-            error: 'Server error', 
-            details: error.message,
-            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            error: 'Server error',
+            details: error.message 
         });
     }
 });
@@ -142,67 +117,58 @@ router.get('/user/:userId', async (req, res) => {
     try {
         const userId = req.params.userId;
         
-        // Get the orders
-        const orders = await req.db.execute(
-            'SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC',
-            [userId]
-        );
+        const orders = await req.db.execute(`
+            SELECT o.*, 
+                   GROUP_CONCAT(
+                       CONCAT(t.title, ' (', oi.quantity, 'x)')
+                       SEPARATOR ', '
+                   ) as items
+            FROM orders o
+            LEFT JOIN order_items oi ON o.id = oi.order_id
+            LEFT JOIN tickets t ON oi.ticket_id = t.id
+            WHERE o.user_id = ?
+            GROUP BY o.id
+            ORDER BY o.created_at DESC
+        `, [userId]);
         
-        // Get the order items for each order
-        const ordersWithItems = await Promise.all(orders.map(async (order) => {
-            const items = await req.db.execute(
-                `SELECT oi.*, t.title, t.img_url 
-                FROM order_items oi 
-                JOIN tickets t ON oi.ticket_id = t.id 
-                WHERE oi.order_id = ?`,
-                [order.id]
-            );
-            
-            return {
-                ...order,
-                items: items
-            };
-        }));
-        
-        res.json(ordersWithItems);
+        res.json(orders);
     } catch (error) {
         console.error('Error fetching user orders:', error);
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-// Get a specific order
-router.get('/:id', async (req, res) => {
+// Get order details
+router.get('/:orderId', async (req, res) => {
     try {
-        const orderId = req.params.id;
+        const orderId = req.params.orderId;
         
-        // Get the order
-        const orders = await req.db.execute(
-            'SELECT * FROM orders WHERE id = ?',
-            [orderId]
-        );
+        // Get order details
+        const orders = await req.db.execute(`
+            SELECT o.*, u.name as user_name, u.email as user_email
+            FROM orders o
+            LEFT JOIN users u ON o.user_id = u.id
+            WHERE o.id = ?
+        `, [orderId]);
         
         if (!orders || orders.length === 0) {
             return res.status(404).json({ error: 'Order not found' });
         }
         
-        // Get the order items
-        const items = await req.db.execute(
-            `SELECT oi.*, t.title, t.img_url 
-            FROM order_items oi 
-            JOIN tickets t ON oi.ticket_id = t.id 
-            WHERE oi.order_id = ?`,
-            [orderId]
-        );
+        // Get order items
+        const orderItems = await req.db.execute(`
+            SELECT oi.*, t.title, t.description, t.img_url
+            FROM order_items oi
+            JOIN tickets t ON oi.ticket_id = t.id
+            WHERE oi.order_id = ?
+        `, [orderId]);
         
-        const orderWithItems = {
-            ...orders[0],
-            items: items
-        };
+        const order = orders[0];
+        order.items = orderItems;
         
-        res.json(orderWithItems);
+        res.json(order);
     } catch (error) {
-        console.error('Error fetching order:', error);
+        console.error('Error fetching order details:', error);
         res.status(500).json({ error: 'Server error' });
     }
 });
