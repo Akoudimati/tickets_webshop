@@ -2,14 +2,11 @@ const mysql = require('mysql2');
 
 // Create database connection pool
 const pool = mysql.createPool({
-    host: 'sql7.freesqldatabase.com',
-    user: 'sql7783571',
-    password: 'k5V4xMb77e',
-    database: 'sql7783571',
-    port: 3306,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
+    host: 'sql8.freesqldatabase.com',
+    user: 'sql8784807',
+    password: 'FyIgb3hgCf',
+    database: 'sql8784807',
+    port: 3306
 });
 
 // Get a promise-based interface to use async/await
