@@ -173,11 +173,10 @@ function submitOrder(orderData, cartKey) {
             window.cartManager.updateCartCount();
         }
         
-        // Show success message
-        alert(`Order #${result.orderId} created successfully! Redirecting to your orders page.`);
-        
-        // Redirect to orders page
-        window.location.href = '/orders.html';
+        // Show success popup modal
+        document.getElementById('orderNumber').textContent = `#${result.orderId}`;
+        const modal = new bootstrap.Modal(document.getElementById('orderSuccessModal'));
+        modal.show();
     })
     .catch(error => {
         console.error('Error creating order:', error);
@@ -189,4 +188,13 @@ function submitOrder(orderData, cartKey) {
             submitButton.textContent = 'Complete Order';
         }
     });
+}
+
+// Navigation functions for the success modal
+function goToOrders() {
+    window.location.href = '/orders.html';
+}
+
+function goToCart() {
+    window.location.href = '/cart.html';
 } 

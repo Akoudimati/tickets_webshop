@@ -6,6 +6,7 @@
     <title>Checkout - Sports Ticket System</title>
     <link rel="stylesheet" href="/css/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -131,6 +132,36 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="orderSuccessModal" tabindex="-1" aria-labelledby="orderSuccessModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="orderSuccessModalLabel">🎉 Order Completed Successfully!</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-3">
+                        <div class="success-icon mb-3">
+                            <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                        </div>
+                        <h4>Thank you for your order! 🚀</h4>
+                        <p class="text-muted">Your order <strong id="orderNumber">#</strong> has been placed successfully.</p>
+                        <p>🎫 Your tickets will be sent to your email address shortly.</p>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-primary btn-lg" onclick="goToOrders()">
+                        📋 View My Orders
+                    </button>
+                    <button type="button" class="btn btn-success btn-lg" onclick="goToCart()">
+                        🛒 Go to Cart
+                    </button>
                 </div>
             </div>
         </div>

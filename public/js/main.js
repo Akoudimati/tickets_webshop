@@ -632,13 +632,28 @@ function showToastNotification(message, type = 'success') {
     
     // Create toast element
     const toast = document.createElement('div');
-    toast.className = `custom-toast ${type}`;
+    toast.className = `custom-toast ${type} ${type === 'success' ? 'clickable' : ''}`;
+    
+    // Make success toasts clickable to go to cart
+    if (type === 'success') {
+        toast.style.cursor = 'pointer';
+        toast.onclick = (e) => {
+            // Don't navigate if clicking close button
+            if (!e.target.classList.contains('toast-close')) {
+                window.location.href = '/cart.html';
+            }
+        };
+    }
+    
     toast.innerHTML = `
         <div class="toast-content">
             <div class="toast-icon">
                 ${type === 'success' ? '✅' : '❌'}
             </div>
-            <div class="toast-message">${message}</div>
+            <div class="toast-message">
+                ${message}
+                ${type === 'success' ? '<br><small class="text-muted">🛒 Click to view cart</small>' : ''}
+            </div>
             <button class="toast-close" onclick="this.parentElement.parentElement.remove()">×</button>
         </div>
     `;
@@ -667,8 +682,22 @@ function showToastNotification(message, type = 'success') {
                 border-left-color: #dc3545;
             }
             
+            .custom-toast.clickable {
+                cursor: pointer;
+                transition: transform 0.3s ease-out, box-shadow 0.2s ease;
+            }
+            
+            .custom-toast.clickable:hover {
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+                transform: translateX(-5px);
+            }
+            
             .custom-toast.show {
                 transform: translateX(0);
+            }
+            
+            .custom-toast.clickable.show:hover {
+                transform: translateX(-5px);
             }
             
             .toast-content {

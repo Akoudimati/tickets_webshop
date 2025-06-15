@@ -494,15 +494,20 @@ function displayOrdersTable() {
             <tr>
                 <td>#${order.id}</td>
                 <td>${order.customer_name || 'Guest'}</td>
-                <td>€${parseFloat(order.total_amount).toFixed(2)}</td>
+                <td>€${parseFloat(order.total_price || 0).toFixed(2)}</td>
                 <td>${statusBadge}</td>
                 <td>${orderDate}</td>
                 <td>
-                    <select class="form-select form-select-sm" onchange="updateOrderStatus(${order.id}, this.value)">
-                        <option value="in behandeling" ${order.status === 'in behandeling' ? 'selected' : ''}>In behandeling</option>
-                        <option value="compleet" ${order.status === 'compleet' ? 'selected' : ''}>Compleet</option>
-                        <option value="geannuleerd" ${order.status === 'geannuleerd' ? 'selected' : ''}>Geannuleerd</option>
-                    </select>
+                    <div class="d-flex gap-2">
+                        <select class="form-select form-select-sm" onchange="updateOrderStatus(${order.id}, this.value)">
+                            <option value="in behandeling" ${order.status === 'in behandeling' ? 'selected' : ''}>In behandeling</option>
+                            <option value="compleet" ${order.status === 'compleet' ? 'selected' : ''}>Compleet</option>
+                            <option value="geannuleerd" ${order.status === 'geannuleerd' ? 'selected' : ''}>Geannuleerd</option>
+                        </select>
+                        <button class="btn btn-danger btn-sm" onclick="deleteOrder(${order.id})" title="Delete Order">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -555,6 +560,38 @@ async function updateOrderStatus(orderId, newStatus) {
         showErrorMessage(error.message);
         // Reload orders to reset the dropdown
         loadAdminOrders();
+    }
+}
+
+async function deleteOrder(orderId) {
+    if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+        return;
+    }
+    
+    hideMessages();
+    
+    try {
+        const response = await fetch(`/api/orders/${orderId}`, {
+            method: 'DELETE',
+            headers: {
+                'user-id': getCurrentUser().id
+            }
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to delete order');
+        }
+        
+        // Remove the order from current list and refresh table
+        currentOrders = currentOrders.filter(order => order.id !== orderId);
+        displayOrdersTable();
+        
+        showSuccessMessage('Order deleted successfully!');
+        
+    } catch (error) {
+        console.error('Error deleting order:', error);
+        showErrorMessage(error.message);
     }
 }
 

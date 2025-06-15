@@ -54,7 +54,12 @@ function loadUserOrders(userId) {
                     <div class="card mb-4">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Order #${order.id}</h5>
-                            <span class="badge ${statusClass}">${statusText}</span>
+                            <div class="d-flex gap-2 align-items-center">
+                                <span class="badge ${statusClass}">${statusText}</span>
+                                <button class="btn btn-danger btn-sm" onclick="deleteUserOrder(${order.id})" title="Delete Order">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -78,7 +83,7 @@ function loadUserOrders(userId) {
                                 <div class="col-md-4">
                                     <h6>Order Items</h6>
                                     <div class="order-items">
-                                        ${order.items ? order.items : 'Loading items...'}
+                                        ${order.items && order.items.length > 0 ? renderOrderItems(order.items) : 'No items found'}
                                     </div>
                                 </div>
                             </div>
@@ -111,13 +116,13 @@ function renderOrderItems(items) {
         const imageUrl = item.img_url || 'https://via.placeholder.com/80x60?text=No+Image';
         
         html += `
-            <div class="order-item mb-3 p-2 border rounded">
+            <div class="order-item mb-3 p-3 border rounded shadow-sm">
                 <div class="d-flex">
-                    <img src="${imageUrl}" alt="${item.title}" class="order-item-image me-3" style="width: 80px; height: 60px; object-fit: cover;">
+                    <img src="${imageUrl}" alt="${item.title}" class="order-item-image me-3 rounded" style="width: 100px; height: 80px; object-fit: cover; border: 2px solid #dee2e6;">
                     <div class="flex-grow-1">
-                        <h6 class="mb-1">${item.title}</h6>
-                        <p class="mb-1">Quantity: ${item.quantity}</p>
-                        <p class="mb-0"><strong>€${formatPrice(item.price)}</strong></p>
+                        <h6 class="mb-1 text-primary">${item.title}</h6>
+                        <p class="mb-1 text-muted">Quantity: ${item.quantity}</p>
+                        <p class="mb-0"><strong class="text-success">€${formatPrice(item.price)}</strong></p>
                     </div>
                 </div>
             </div>
@@ -179,5 +184,55 @@ function formatDate(dateString) {
     } catch (error) {
         console.error('Error formatting date:', error);
         return dateString;
+    }
+}
+
+// Delete user order function
+async function deleteUserOrder(orderId) {
+    if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/orders/${orderId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to delete order');
+        }
+        
+        // Show success message
+        const ordersContainer = document.getElementById('orders-container');
+        const successAlert = document.createElement('div');
+        successAlert.className = 'alert alert-success alert-dismissible fade show';
+        successAlert.innerHTML = `
+            <strong>Success!</strong> Order #${orderId} has been deleted successfully.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        ordersContainer.insertBefore(successAlert, ordersContainer.firstChild);
+        
+        // Reload orders to refresh the page
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+            loadUserOrders(currentUser.id);
+        }
+        
+    } catch (error) {
+        console.error('Error deleting order:', error);
+        
+        // Show error message
+        const ordersContainer = document.getElementById('orders-container');
+        const errorAlert = document.createElement('div');
+        errorAlert.className = 'alert alert-danger alert-dismissible fade show';
+        errorAlert.innerHTML = `
+            <strong>Error!</strong> Failed to delete order: ${error.message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        ordersContainer.insertBefore(errorAlert, ordersContainer.firstChild);
     }
 } 

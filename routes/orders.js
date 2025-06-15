@@ -68,11 +68,10 @@ router.post('/', async (req, res) => {
             
             const orderId = orderResult.insertId;
             
-            // Add order items
+            // Add order items with manual ID generation to avoid AUTO_INCREMENT issues
             for (const item of items) {
                 // Ensure item properties are not undefined
                 const itemParams = [
-                    toNullIfEmpty(orderId), 
                     toNullIfEmpty(item.ticket_id), 
                     toNullIfEmpty(item.quantity), 
                     toNullIfEmpty(item.price)
@@ -84,11 +83,42 @@ router.post('/', async (req, res) => {
                     throw new Error(`Invalid item data: contains undefined values`);
                 }
                 
-                // Add order item
-                await conn.execute(
-                    'INSERT INTO order_items (order_id, ticket_id, quantity, price) VALUES (?, ?, ?, ?)',
-                    itemParams
-                );
+                // Generate a unique ID manually to avoid AUTO_INCREMENT problems
+                let uniqueId;
+                let maxAttempts = 10;
+                let attempts = 0;
+                
+                while (attempts < maxAttempts) {
+                    try {
+                        // Get the next available ID
+                        const [maxResult] = await conn.execute('SELECT IFNULL(MAX(id), 0) + 1 as next_id FROM order_items');
+                        uniqueId = maxResult[0].next_id;
+                        
+                        // Insert with explicit ID
+                        await conn.execute(
+                            'INSERT INTO order_items (id, order_id, ticket_id, quantity, price) VALUES (?, ?, ?, ?, ?)',
+                            [uniqueId, orderId, ...itemParams]
+                        );
+                        
+                        console.log(`✅ Successfully added order item with ID: ${uniqueId}`);
+                        break; // Success, exit the retry loop
+                        
+                    } catch (insertError) {
+                        attempts++;
+                        if (insertError.code === 'ER_DUP_ENTRY' && attempts < maxAttempts) {
+                            console.log(`⚠️ ID ${uniqueId} already exists, retrying... (attempt ${attempts}/${maxAttempts})`);
+                            // Wait a bit and retry with a new ID
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                            continue;
+                        } else {
+                            throw insertError;
+                        }
+                    }
+                }
+                
+                if (attempts >= maxAttempts) {
+                    throw new Error('Failed to generate unique ID for order item after multiple attempts');
+                }
             }
             
             await conn.commit();
@@ -117,19 +147,25 @@ router.get('/user/:userId', async (req, res) => {
     try {
         const userId = req.params.userId;
         
+        // Get all orders for the user
         const orders = await req.db.execute(`
-            SELECT o.*, 
-                   GROUP_CONCAT(
-                       CONCAT(t.title, ' (', oi.quantity, 'x)')
-                       SEPARATOR ', '
-                   ) as items
+            SELECT o.*
             FROM orders o
-            LEFT JOIN order_items oi ON o.id = oi.order_id
-            LEFT JOIN tickets t ON oi.ticket_id = t.id
             WHERE o.user_id = ?
-            GROUP BY o.id
             ORDER BY o.created_at DESC
         `, [userId]);
+        
+        // For each order, get the detailed order items with images
+        for (let order of orders) {
+            const orderItems = await req.db.execute(`
+                SELECT oi.*, t.title, t.description, t.img_url, t.category_id
+                FROM order_items oi
+                JOIN tickets t ON oi.ticket_id = t.id
+                WHERE oi.order_id = ?
+            `, [order.id]);
+            
+            order.items = orderItems;
+        }
         
         res.json(orders);
     } catch (error) {
@@ -170,6 +206,47 @@ router.get('/:orderId', async (req, res) => {
     } catch (error) {
         console.error('Error fetching order details:', error);
         res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Delete an order
+router.delete('/:orderId', async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        
+        // Start a transaction to delete order and its items
+        const pool = req.db.getPool();
+        const conn = await pool.promise().getConnection();
+        
+        try {
+            await conn.beginTransaction();
+            
+            // First delete order items
+            await conn.execute('DELETE FROM order_items WHERE order_id = ?', [orderId]);
+            
+            // Then delete the order
+            const [result] = await conn.execute('DELETE FROM orders WHERE id = ?', [orderId]);
+            
+            if (result.affectedRows === 0) {
+                await conn.rollback();
+                return res.status(404).json({ error: 'Order not found' });
+            }
+            
+            await conn.commit();
+            
+            res.json({ message: 'Order deleted successfully' });
+        } catch (err) {
+            await conn.rollback();
+            throw err;
+        } finally {
+            conn.release();
+        }
+    } catch (error) {
+        console.error('Error deleting order:', error);
+        res.status(500).json({ 
+            error: 'Server error',
+            details: error.message 
+        });
     }
 });
 
