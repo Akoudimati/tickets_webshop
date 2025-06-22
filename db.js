@@ -4,7 +4,7 @@ const mysql = require('mysql2');
 const pool = mysql.createPool({
     host: 'mysql-3dfa6410-student-b14a.h.aivencloud.com',
     user: 'avnadmin',
-    password: process.env.DB_PASSWORD,
+    password: 'AVNS_YybduGVk3kmayJuZByo',
     database: 'defaultdb',
     port: 15421
 });
