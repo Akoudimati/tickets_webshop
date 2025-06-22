@@ -1,10 +1,4 @@
-use `sql8784807`;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `categories`
---
+use `defaultdb`;
 
 CREATE TABLE `categories` (
   `id` int(11) NOT NULL,
