@@ -5,7 +5,7 @@ const pool = mysql.createPool({
     host: 'mysql-3dfa6410-student-b14a.h.aivencloud.com',
     user: 'avnadmin',
     password: 'AVNS_YybduGVk3kmayJuZByo',
-    database: 'defaultdb',
+    database: 'sport_tickets',
     port: 15421
 });
 
