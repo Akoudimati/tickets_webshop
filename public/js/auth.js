@@ -51,21 +51,29 @@ function updateNavigation() {
     const rightNav = navbarNav.querySelector('.ms-auto') || navbarNav.querySelector('.navbar-nav:last-child');
     if (!rightNav) return;
     
-    // Add admin link to left navigation if user is admin
-    if (isLoggedIn() && isAdmin()) {
-        // Check if admin link already exists
-        const existingAdminLink = leftNav.querySelector('a[href="/admin.html"]');
-        if (!existingAdminLink) {
-            const adminItem = document.createElement('li');
-            adminItem.className = 'nav-item';
-            adminItem.innerHTML = '<a class="nav-link admin-btn" href="/admin.html"><i class="bi bi-gear-fill me-1"></i>Admin</a>';
-            leftNav.appendChild(adminItem);
+    // Always show admin link, but handle access differently
+    const existingAdminLink = leftNav.querySelector('a[data-admin-link="true"]');
+    if (!existingAdminLink) {
+        const adminItem = document.createElement('li');
+        adminItem.className = 'nav-item';
+        
+        if (isLoggedIn() && isAdmin()) {
+            // Allow access for admin users
+            adminItem.innerHTML = '<a class="nav-link admin-btn" href="/admin.html" data-admin-link="true"><i class="fas fa-cogs me-1"></i>Admin</a>';
+        } else {
+            // Show admin button but restrict access for non-admin users
+            adminItem.innerHTML = '<a class="nav-link admin-btn" href="#" data-admin-link="true" onclick="showAdminAccessAlert()"><i class="fas fa-cogs me-1"></i>Admin</a>';
         }
+        
+        leftNav.appendChild(adminItem);
     } else {
-        // Remove admin link if user is not admin or not logged in
-        const adminItem = leftNav.querySelector('a[href="/admin.html"]');
-        if (adminItem) {
-            adminItem.parentElement.remove();
+        // Update existing admin link based on user status
+        if (isLoggedIn() && isAdmin()) {
+            existingAdminLink.href = '/admin.html';
+            existingAdminLink.onclick = null;
+        } else {
+            existingAdminLink.href = '#';
+            existingAdminLink.onclick = showAdminAccessAlert;
         }
     }
     
@@ -241,4 +249,52 @@ function logout() {
     
     // Redirect to home page
     window.location.href = '/';
+}
+
+// Show admin access alert for non-admin users
+function showAdminAccessAlert() {
+    const alertHtml = `
+        <div class="modal fade" id="adminAccessModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title">
+                            <i class="fas fa-shield-alt me-2"></i>Admin Access Required
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-user-shield fa-3x text-warning mb-3"></i>
+                        </div>
+                        <h6>Admin Panel </h6>
+                        <p class="mb-3"></p>
+                        <div class="alert alert-info">
+                            <strong>Access Restricted:</strong>
+                        </div>
+                        <p>log in to see the admin page</small></p>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <a href="/login.html" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login as Admin
+                        </a>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if any
+    const existingModal = document.getElementById('adminAccessModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', alertHtml);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('adminAccessModal'));
+    modal.show();
 } 

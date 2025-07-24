@@ -73,7 +73,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: url('/images/user_images/background_image.jpg') center center fixed;
+    background: url('/images/background_image.jpg') center center fixed;
     background-size: cover;
     background-repeat: no-repeat;
     color: var(--white);
