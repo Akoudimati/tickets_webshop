@@ -233,7 +233,7 @@ function displayFilteredTickets() {
         
         html += `
         <div class="col-md-4 col-sm-6 mb-4">
-            <div class="card">
+            <div class="card ticket-card">
                 <img src="${imageUrl}" class="card-img-top" alt="${ticket.title}">
                 <div class="card-body">
                     <h5 class="card-title">${ticket.title || 'Event'}</h5>

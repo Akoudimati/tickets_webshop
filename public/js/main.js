@@ -66,12 +66,12 @@ function loadCategories() {
             let html = '';
             
             categories.forEach(category => {
-                const imageUrl = category.img_url || 'https://via.placeholder.com/300x200/28a745/ffffff?text=' + encodeURIComponent(category.name);
+                const imageUrl = category.img_url || 'https://via.placeholder.com/300x200/6c757d/ffffff?text=' + encodeURIComponent(category.name);
                 
                 html += `
                     <div class="category-card">
                         <div class="category-image">
-                            <img src="${imageUrl}" alt="${category.name}" onerror="this.src='https://via.placeholder.com/300x200/28a745/ffffff?text=${encodeURIComponent(category.name)}'">
+                            <img src="${imageUrl}" alt="${category.name}" onerror="this.src='https://via.placeholder.com/300x200/6c757d/ffffff?text=${encodeURIComponent(category.name)}'">
                         </div>
                         <div class="category-content">
                             <h3 class="category-title">${category.name}</h3>
@@ -132,7 +132,7 @@ function loadLatestTickets() {
                 
                 html += `
                 <div class="col-md-4 col-sm-6 mb-4">
-                    <div class="card">
+                    <div class="card ticket-card">
                         <img src="${imageUrl}" class="card-img-top" alt="${ticket.title}">
                         <div class="card-body">
                             <h5 class="card-title">${ticket.title || 'Event'}</h5>
@@ -241,7 +241,7 @@ function loadAllTickets() {
                 
                 html += `
                 <div class="col-md-4 col-sm-6 mb-4">
-                    <div class="card">
+                    <div class="card ticket-card">
                         <img src="${imageUrl}" class="card-img-top" alt="${ticket.title}">
                         <div class="card-body">
                             <h5 class="card-title">${ticket.title || 'Event'}</h5>
@@ -333,7 +333,7 @@ function loadCategoryTickets(categoryId) {
                 
                 html += `
                 <div class="col-md-4 col-sm-6 mb-4">
-                    <div class="card">
+                    <div class="card ticket-card">
                         <img src="${imageUrl}" class="card-img-top" alt="${ticket.title}">
                         <div class="card-body">
                             <h5 class="card-title">${ticket.title || 'Event'}</h5>
@@ -675,7 +675,7 @@ function showToastNotification(message, type = 'success') {
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
                 transform: translateX(400px);
                 transition: transform 0.3s ease-out;
-                border-left: 4px solid #28a745;
+                border-left: 4px solid #6c757d;
             }
             
             .custom-toast.error {
